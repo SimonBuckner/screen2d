@@ -6,12 +6,12 @@ import (
 
 type game struct {
 	screen         *screen2d.Screen
-	atlas          *screen2d.Atlas
+	atlas          *screen2d.SpriteMap
 	e1, e2, e3, e4 *screen2d.Entity
 }
 
 const (
-	keyAlienSprCYA screen2d.AtlasKey = iota
+	keyAlienSprCYA screen2d.SpriteMapKey = iota
 	keyAlienSprCYB
 )
 
@@ -26,28 +26,24 @@ func main() {
 
 	g := &game{
 		screen: s,
-		atlas:  screen2d.NewAtlas(),
+		atlas:  screen2d.NewSpriteMap(),
 		e1:     screen2d.NewEntity(),
 		e2:     screen2d.NewEntity(),
 		e3:     screen2d.NewEntity(),
 		e4:     screen2d.NewEntity(),
 	}
 
-	{
-		s, err := screen2d.NewSpriteFromnRGBAPixels(s, alienSprCYA.Pixels, int32(alienSprCYA.Pitch))
-		if err != nil {
-			panic(err)
-		}
-		g.atlas.AddSprite(keyAlienSprCYA, s)
+	s1 := screen2d.NewSprite(s.Rend())
+	if s1.LoadRGBAPixels(alienSprCYA.Pixels, int32(alienSprCYA.Pitch)) != nil {
+		panic(err)
 	}
+	g.atlas.AddSprite(keyAlienSprCYA, s1)
 
-	{
-		s, err := screen2d.NewSpriteFromnRGBAPixels(s, alienSprCYB.Pixels, int32(alienSprCYB.Pitch))
-		if err != nil {
-			panic(err)
-		}
-		g.atlas.AddSprite(keyAlienSprCYB, s)
+	s2 := screen2d.NewSprite(s.Rend())
+	if s2.LoadRGBAPixels(alienSprCYB.Pixels, int32(alienSprCYB.Pitch)) != nil {
+		panic(err)
 	}
+	g.atlas.AddSprite(keyAlienSprCYB, s2)
 
 	s.SetUpdateFunc(g.update)
 	s.SetDrawFunc(g.draw)
@@ -65,7 +61,7 @@ func main() {
 	s.Run()
 }
 
-func (g *game) update(ticks uint32) {
+func (g *game) update(ticks uint32, elapsed float32) {
 	g.e1.SetPos(100, 100, 0)
 	g.e2.SetPos(200, 200, 0)
 	g.e3.SetPos(300, 300, 0)

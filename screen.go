@@ -12,37 +12,43 @@ type Drawer interface {
 }
 
 // UpdateFunc is the function that will be called during the update phase
-type UpdateFunc func(ticks uint32)
+type UpdateFunc func(ticks uint32, elapsed float32)
 
 // DrawFunc is the function that will be called during the draw phase
 type DrawFunc func()
 
+// KeyboardEventFunc is the function that will be called when a keyboard event occurs
+type KeyboardEventFunc func(e *sdl.KeyboardEvent)
+
 // Screen represents a 2d window as shown on the screen
 type Screen struct {
-	top        int32
-	left       int32
-	width      int32
-	height     int32
-	title      string
-	elapsed    float32
-	rend       *sdl.Renderer
-	wind       *sdl.Window
-	keyb       *KBState
-	updateFunc UpdateFunc
-	drawFunc   DrawFunc
+	top         int32
+	left        int32
+	width       int32
+	height      int32
+	title       string
+	close       bool
+	rend        *sdl.Renderer
+	wind        *sdl.Window
+	keyb        *KBState
+	updateFunc  UpdateFunc
+	drawFunc    DrawFunc
+	keyDownFunc KeyboardEventFunc
+	keyUpFunc   KeyboardEventFunc
 }
 
 // NewScreen returns a newly initialisd screen in Windowed mode
 func NewScreen(width, height int, title string) (*Screen, error) {
 	s := &Screen{
-		// top:    int32(top),
-		// left:   int32(left),
-		width:      int32(width),
-		height:     int32(height),
-		title:      title,
-		keyb:       NewKBState(),
-		drawFunc:   drawStub,
-		updateFunc: updateStub,
+		width:       int32(width),
+		height:      int32(height),
+		title:       title,
+		close:       false,
+		keyb:        NewKBState(),
+		drawFunc:    drawStub,
+		updateFunc:  updateStub,
+		keyDownFunc: keyEventStub,
+		keyUpFunc:   keyEventStub,
 	}
 
 	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "0")
@@ -97,20 +103,26 @@ func (s *Screen) SetDrawFunc(f DrawFunc) {
 	s.drawFunc = f
 }
 
+// SetKeyDownFunc sets the function that will be called whena key is pressed
+func (s *Screen) SetKeyDownFunc(f KeyboardEventFunc) {
+	s.keyDownFunc = f
+}
+
+// SetKeyUpFunc sets the function that will be called when a key is released
+func (s *Screen) SetKeyUpFunc(f KeyboardEventFunc) {
+	s.keyUpFunc = f
+}
+
 // Run starts the main event loop
 func (s *Screen) Run() {
-	// s.FPSCount = 0
-	// s.FPS = 0
-	// s.FPSStart = time.Now()
-
 	var loopStart time.Time
+	var elapsed float32
 
 	for {
 		loopStart = time.Now()
-		// if s.Stopping {
-		// 	return
-		// }
-
+		if s.close {
+			return
+		}
 		s.keyb.Refresh()
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -121,32 +133,35 @@ func (s *Screen) Run() {
 				if e.Event == sdl.WINDOWEVENT_CLOSE {
 					return
 				}
-				// case *sdl.KeyboardEvent:
-				// 	s.FireKeyboardEvent(e)
+			case *sdl.KeyboardEvent:
+				s.despatchKeyboardEvent(e)
 			}
 		}
 
 		s.rend.Clear()
-		s.updateFunc(sdl.GetTicks())
+		s.updateFunc(sdl.GetTicks(), elapsed)
 		s.drawFunc()
 		s.rend.Present()
-		// sdl.Delay(1)
-		// s.loopStart = float32(time.Since(frameStart).Seconds())
-		// s.FPSCount++
-		// if time.Since(s.FPSStart) > time.Second {
-		// 	s.FPS = s.FPSCount
-		// 	s.FPSStart = time.Now()
-		// 	s.FPSCount = 0
-		// 	fmt.Printf("Frames per second : %d\n", s.FPS)
-		// }
-		s.elapsed = float32(time.Since(loopStart).Seconds())
+
+		elapsed = float32(time.Since(loopStart).Seconds())
 	}
 }
 
-func updateStub(ticks uint32) {
-	sdl.Delay(16)
+// Close causes the Screen to close
+func (s *Screen) Close() {
+	s.close = true
 }
 
-func drawStub() {
-
+func (s *Screen) despatchKeyboardEvent(e *sdl.KeyboardEvent) {
+	switch e.Type {
+	case sdl.KEYDOWN:
+		s.keyDownFunc(e)
+	case sdl.KEYUP:
+		s.keyUpFunc(e)
+	}
 }
+
+// Default stub functions to reduce number of nil tests
+func updateStub(ticks uint32, elapsed float32) {}
+func drawStub()                                {}
+func keyEventStub(e *sdl.KeyboardEvent)        {}
