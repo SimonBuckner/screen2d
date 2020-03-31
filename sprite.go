@@ -6,6 +6,9 @@ import (
 
 // Sprite represents a single object on the screen
 type Sprite struct {
+	// On-screen game position
+	X, Y, Z     int32
+	Scale       float32
 	w, h, pitch int32
 	rend        *sdl.Renderer
 	surf        *sdl.Surface
@@ -19,6 +22,7 @@ func NewSprite(rend *sdl.Renderer) *Sprite {
 		w:     0,
 		h:     0,
 		pitch: 0,
+		Scale: 0.1,
 	}
 	return s
 }
@@ -46,17 +50,17 @@ func (s *Sprite) LoadRGBAPixels(pixels []int, pitch int32) error {
 	return nil
 }
 
-// DrawAt the Sprite onto the screen
-func (s *Sprite) DrawAt(x, y, z int32, scale float32) {
+// Draw the Sprite onto the screen
+func (s *Sprite) Draw() {
 	if s.tex == nil {
 		return
 	}
 
 	dstRect := &sdl.Rect{
-		X: x,
-		Y: y,
-		W: int32(float32(s.w) * scale),
-		H: int32(float32(s.h) * scale),
+		X: s.X,
+		Y: s.Y,
+		W: int32(float32(s.w) * s.Scale),
+		H: int32(float32(s.h) * s.Scale),
 	}
 	s.rend.Copy(s.tex, nil, dstRect)
 }
@@ -69,4 +73,11 @@ func (s *Sprite) GetPitch() int32 {
 // GetPixels returns the Sprite Pixels
 func (s *Sprite) GetPixels() []byte {
 	return s.surf.Pixels()
+}
+
+// SetPos sets the position of the Entity
+func (s *Sprite) SetPos(x, y, z int32) {
+	s.X = x
+	s.Y = y
+	s.Z = z
 }

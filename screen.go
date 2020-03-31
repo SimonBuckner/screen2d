@@ -153,6 +153,9 @@ func (s *Screen) Close() {
 }
 
 func (s *Screen) despatchKeyboardEvent(e *sdl.KeyboardEvent) {
+	if e.Repeat != 0 {
+		return
+	}
 	switch e.Type {
 	case sdl.KEYDOWN:
 		s.keyDownFunc(e)
@@ -165,3 +168,31 @@ func (s *Screen) despatchKeyboardEvent(e *sdl.KeyboardEvent) {
 func updateStub(ticks uint32, elapsed float32) {}
 func drawStub()                                {}
 func keyEventStub(e *sdl.KeyboardEvent)        {}
+
+// ClearUpdateFunc clears the function that will be called during the update phase
+func (s *Screen) ClearUpdateFunc() {
+	s.updateFunc = updateStub
+}
+
+// ClearDrawFunc clears the function that will be called during the draw phase
+func (s *Screen) ClearDrawFunc() {
+	s.drawFunc = drawStub
+}
+
+// ClearKeyDownFunc clears the function that will be called whena key is pressed
+func (s *Screen) ClearKeyDownFunc() {
+	s.keyDownFunc = keyEventStub
+}
+
+// ClearKeyUpFunc clears the function that will be called when a key is released
+func (s *Screen) ClearKeyUpFunc() {
+	s.keyUpFunc = keyEventStub
+}
+
+// ClearFuncs clears all update functions
+func (s *Screen) ClearFuncs() {
+	s.updateFunc = updateStub
+	s.drawFunc = drawStub
+	s.keyDownFunc = keyEventStub
+	s.keyUpFunc = keyEventStub
+}
