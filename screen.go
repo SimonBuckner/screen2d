@@ -143,6 +143,7 @@ func (s *Screen) Run() {
 		s.drawFunc()
 		s.rend.Present()
 
+		sdl.Delay(1)
 		elapsed = float32(time.Since(loopStart).Seconds())
 	}
 }
