@@ -1,8 +1,6 @@
 package screen2d
 
 import (
-	"time"
-
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -31,6 +29,7 @@ type Screen struct {
 	rend        *sdl.Renderer
 	wind        *sdl.Window
 	keyb        *KBState
+	counter     *Counter
 	updateFunc  UpdateFunc
 	drawFunc    DrawFunc
 	keyDownFunc KeyboardEventFunc
@@ -45,6 +44,7 @@ func NewScreen(width, height int, title string) (*Screen, error) {
 		title:       title,
 		close:       false,
 		keyb:        NewKBState(),
+		counter:     &Counter{},
 		drawFunc:    drawStub,
 		updateFunc:  updateStub,
 		keyDownFunc: keyEventStub,
@@ -115,11 +115,9 @@ func (s *Screen) SetKeyUpFunc(f KeyboardEventFunc) {
 
 // Run starts the main event loop
 func (s *Screen) Run() {
-	var loopStart time.Time
-	var elapsed float32
-
+	s.counter.Start()
 	for {
-		loopStart = time.Now()
+		s.counter.FrameStart()
 		if s.close {
 			return
 		}
@@ -139,12 +137,12 @@ func (s *Screen) Run() {
 		}
 
 		s.rend.Clear()
-		s.updateFunc(sdl.GetTicks(), elapsed)
+		s.updateFunc(sdl.GetTicks(), s.counter.LastFrameElapsed)
 		s.drawFunc()
 		s.rend.Present()
 
 		sdl.Delay(1)
-		elapsed = float32(time.Since(loopStart).Seconds())
+		s.counter.FrameEnd()
 	}
 }
 
@@ -154,9 +152,9 @@ func (s *Screen) Close() {
 }
 
 func (s *Screen) despatchKeyboardEvent(e *sdl.KeyboardEvent) {
-	if e.Repeat != 0 {
-		return
-	}
+	// if e.Repeat != 0 {
+	// 	return
+	// }
 	switch e.Type {
 	case sdl.KEYDOWN:
 		s.keyDownFunc(e)
@@ -196,4 +194,9 @@ func (s *Screen) ClearFuncs() {
 	s.drawFunc = drawStub
 	s.keyDownFunc = keyEventStub
 	s.keyUpFunc = keyEventStub
+}
+
+// GetKBState allows access to the current state of the keyboard
+func (s *Screen) GetKBState() *KBState {
+	return s.keyb
 }

@@ -2,6 +2,7 @@ package screen2d
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -138,3 +139,35 @@ type Box struct {
 // 	}
 // 	return false
 // }
+
+// Counter hold various runtie countners
+type Counter struct {
+	start            time.Time
+	frameStart       time.Time
+	frames           int
+	FramesPerSecond  int
+	LastFrameElapsed float32
+}
+
+// Start the counters running
+func (c *Counter) Start() {
+	c.start = time.Now()
+	c.frames = 0
+}
+
+// FrameStart indicates a rendering frame as started
+func (c *Counter) FrameStart() {
+	c.frameStart = time.Now()
+}
+
+// FrameEnd indicates the rendering frame has ended
+func (c *Counter) FrameEnd() {
+	c.LastFrameElapsed = float32(time.Since(c.frameStart).Seconds())
+	c.frames++
+	if time.Since(c.start).Seconds() > 1 {
+		c.FramesPerSecond = c.frames
+		c.frames = 0
+		c.start = time.Now()
+		fmt.Printf("FPS %d\n", c.FramesPerSecond)
+	}
+}
