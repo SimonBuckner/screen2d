@@ -59,6 +59,9 @@ func (e *Entity) SetSprite(sprite *Sprite) {
 
 // Draw is the default draw method
 func (e *Entity) Draw() {
+	if e.Sprite == nil {
+		return
+	}
 	x, y := e.calcScreenXYFunc(e.X, e.Y, e.Scale)
 	e.Sprite.DrawAt(x, y, e.Scale)
 }
