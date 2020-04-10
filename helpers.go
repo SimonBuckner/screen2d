@@ -100,31 +100,31 @@ type Box struct {
 	X2, Y2 int32
 }
 
-// // Hitter represents an item that can be checked to see if it has hit another item
-// type Hitter interface {
-// 	GetBox() Box
-// 	GetPitch() int32
-// 	GetPixels() []byte
-// }
+// Hitter represents an item that can be checked to see if it has hit another item
+type Hitter interface {
+	GetBox() Box
+	// GetPitch() int32
+	// GetPixels() []byte
+}
 
-// // CheckBoxHit checks if any part of the two EntitState boxes overlap
-// func CheckBoxHit(entity1, entity2 Hitter) bool {
+// CheckBoxHit checks if any part of the two EntitState boxes overlap
+func CheckBoxHit(entity1, entity2 Hitter) bool {
 
-// 	r1 := entity1.GetBox()
-// 	r2 := entity2.GetBox()
+	r1 := entity1.GetBox()
+	r2 := entity2.GetBox()
 
-// 	// Too far left or right
-// 	if r1.X1 > r2.X2 || r1.X2 < r2.X2 {
-// 		return false
-// 	}
+	// Too far left or right
+	if r1.X1 > r2.X2 || r1.X2 < r2.X2 {
+		return false
+	}
 
-// 	// Top high or low
-// 	if r1.Y1 > r2.Y2 || r1.Y2 < r2.Y1 {
-// 		return false
-// 	}
+	// Top high or low
+	if r1.Y1 > r2.Y2 || r1.Y2 < r2.Y1 {
+		return false
+	}
 
-// 	return true
-// }
+	return true
+}
 
 // // CheckPixelHit checks if any pixels in the two EntityStates overlap
 // func CheckPixelHit(entity1, entity2 Hitter, miss *sdl.Color) bool {
@@ -180,8 +180,6 @@ func (c *Counter) Start() {
 	c.fpsStart = time.Now()
 	c.frameStart = time.Now()
 	c.fpsFrames = 0
-	c.min = 999
-	c.max = 0
 }
 
 // FrameStart indicates a rendering frame as started
@@ -193,26 +191,12 @@ func (c *Counter) FrameStart() {
 func (c *Counter) FrameEnd() {
 	c.FrameElapsed = float32(time.Since(c.frameStart).Seconds())
 	c.fpsFrames++
-	// if c.LastFrameElapsed > c.max {
-	// 	c.max = c.LastFrameElapsed
-	// }
-	// if c.LastFrameElapsed < c.min {
-	// 	c.min = c.LastFrameElapsed
-	// }
-
-	// if c.FrameElapsed < .005 {
-	// 	sdl.Delay(5 - uint32(c.FrameElapsed*500.0))
-	// 	c.FrameElapsed = float32(time.Since(c.elapsedStart).Seconds())
-	// }
 
 	if time.Since(c.fpsStart).Seconds() > 1 {
-		// fmt.Printf("FPS (min/max) - %d (%f/%f)\n", c.frames, c.min, c.max)
-		// fmt.Printf("FPS - %d\n", c.fpsFrames)
+		fmt.Printf("FPS - %d\n", c.fpsFrames)
 		c.FPS = c.fpsFrames
 		c.fpsStart = time.Now()
 		c.fpsFrames = 0
-		// c.min = 999
-		// c.max = 0
 	}
 }
 

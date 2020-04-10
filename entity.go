@@ -7,15 +7,17 @@ type Entity struct {
 	Scale            float32
 	Sprite           *Sprite
 	calcScreenXYFunc CalcScreenXYFunc
+	Visible          bool
 }
 
 // NewEntity returns a new Entity
 func NewEntity() *Entity {
 	e := &Entity{
-		X:     0,
-		Y:     0,
-		Z:     0,
-		Scale: 1.0,
+		X:       0,
+		Y:       0,
+		Z:       0,
+		Scale:   1.0,
+		Visible: true,
 	}
 	return e
 }
@@ -37,8 +39,8 @@ func (e *Entity) GetBox() Box {
 	return Box{
 		X1: int32(e.X),
 		Y1: int32(e.Y),
-		X2: int32(e.Sprite.w),
-		Y2: int32(e.Sprite.h),
+		X2: int32(e.X) + e.Sprite.w,
+		Y2: int32(e.Y) + e.Sprite.h,
 	}
 }
 
@@ -56,7 +58,7 @@ func (e *Entity) SetSprite(sprite *Sprite) {
 
 // Draw is the default draw method
 func (e *Entity) Draw() {
-	if e.Sprite == nil {
+	if e.Sprite == nil || e.Visible == false {
 		return
 	}
 	x, y := e.calcScreenXYFunc(e.X, e.Y, e.Scale)
