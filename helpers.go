@@ -64,6 +64,31 @@ func RGBAPixels2Surface(rgbaData []int, w, h int32) (*sdl.Surface, error) {
 	return surf, nil
 }
 
+// RGBAPixels2Texture takes an array of RGBA pixel data and returns a Texture
+func RGBAPixels2Texture(rend *sdl.Renderer, rgbaData []int, w, h int32) (*sdl.Texture, error) {
+	if int32(len(rgbaData)) != w*h {
+		return nil, fmt.Errorf("bitmap does not have the correct number of pixels for surface (%d: %d*%d", len(rgbaData), w, h)
+	}
+
+	surf, err := sdl.CreateRGBSurfaceWithFormat(0, w, h, 32, sdl.PIXELFORMAT_RGBA8888)
+	if err != nil {
+		return nil, err
+	}
+
+	pixels := surf.Pixels()
+	j := 0
+	for i := 0; i < len(rgbaData); i++ {
+		j = i * 4
+		pixels[j+0] = byte((rgbaData[i] & 0xFF000000) >> 24)
+		pixels[j+1] = byte((rgbaData[i] & 0x00FF0000) >> 16)
+		pixels[j+2] = byte((rgbaData[i] & 0x0000FF00) >> 8)
+		pixels[j+3] = byte((rgbaData[i] & 0x000000FF))
+	}
+	tex, texErr := rend.CreateTextureFromSurface(surf)
+
+	return tex, texErr
+}
+
 // Surface2Texture takes a Surface returnes a Texxture
 func Surface2Texture(rend *sdl.Renderer, surf *sdl.Surface) (*sdl.Texture, error) {
 	return rend.CreateTextureFromSurface(surf)
@@ -142,17 +167,21 @@ type Box struct {
 
 // Counter hold various runtie countners
 type Counter struct {
-	start            time.Time
-	frameStart       time.Time
-	frames           int
-	FramesPerSecond  int
-	LastFrameElapsed float32
+	FPS          int
+	fpsStart     time.Time
+	fpsFrames    int
+	FrameElapsed float32
+	frameStart   time.Time
+	min, max     float32
 }
 
 // Start the counters running
 func (c *Counter) Start() {
-	c.start = time.Now()
-	c.frames = 0
+	c.fpsStart = time.Now()
+	c.frameStart = time.Now()
+	c.fpsFrames = 0
+	c.min = 999
+	c.max = 0
 }
 
 // FrameStart indicates a rendering frame as started
@@ -162,12 +191,35 @@ func (c *Counter) FrameStart() {
 
 // FrameEnd indicates the rendering frame has ended
 func (c *Counter) FrameEnd() {
-	c.LastFrameElapsed = float32(time.Since(c.frameStart).Seconds())
-	c.frames++
-	if time.Since(c.start).Seconds() > 1 {
-		c.FramesPerSecond = c.frames
-		c.frames = 0
-		c.start = time.Now()
-		fmt.Printf("FPS %d\n", c.FramesPerSecond)
+	c.FrameElapsed = float32(time.Since(c.frameStart).Seconds())
+	c.fpsFrames++
+	// if c.LastFrameElapsed > c.max {
+	// 	c.max = c.LastFrameElapsed
+	// }
+	// if c.LastFrameElapsed < c.min {
+	// 	c.min = c.LastFrameElapsed
+	// }
+
+	// if c.FrameElapsed < .005 {
+	// 	sdl.Delay(5 - uint32(c.FrameElapsed*500.0))
+	// 	c.FrameElapsed = float32(time.Since(c.elapsedStart).Seconds())
+	// }
+
+	if time.Since(c.fpsStart).Seconds() > 1 {
+		// fmt.Printf("FPS (min/max) - %d (%f/%f)\n", c.frames, c.min, c.max)
+		// fmt.Printf("FPS - %d\n", c.fpsFrames)
+		c.FPS = c.fpsFrames
+		c.fpsStart = time.Now()
+		c.fpsFrames = 0
+		// c.min = 999
+		// c.max = 0
 	}
+}
+
+// CalcScreenXYFunc allows for custom conversion of virtaul Game X/Y coords to Screen coords
+type CalcScreenXYFunc func(x, y, scale float32) (tX, tY int32)
+
+// calcScreenXY is the default conversion used for virtual Game to Screen X/Y coords
+func calcScreenXY(x, y, scale float32) (tX, tY int32) {
+	return int32(x * scale), int32(y * scale)
 }

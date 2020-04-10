@@ -1,8 +1,5 @@
 package screen2d
 
-// CalcScreenXYFunc allows for custom conversion of virtaul Game X/Y coords to Screen coords
-type CalcScreenXYFunc func(x, y, scale float32) (tX, tY int32)
-
 // Entity is a item that can be displayed on the screen and tested for collision
 type Entity struct {
 	// Virtaul game position
@@ -74,8 +71,4 @@ func (e *Entity) SetCalcScreenXYFunc(f CalcScreenXYFunc) {
 // ClearCalcScreenXYFunc restores the default virutal game to screen coord calculation
 func (e *Entity) ClearCalcScreenXYFunc() {
 	e.calcScreenXYFunc = calcScreenXY
-}
-
-func calcScreenXY(x, y, scale float32) (tX, tY int32) {
-	return int32(x * scale), int32(y * scale)
 }

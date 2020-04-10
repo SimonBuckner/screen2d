@@ -1,6 +1,8 @@
 package screen2d
 
 import (
+	"fmt"
+
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -34,6 +36,14 @@ type Screen struct {
 	drawFunc    DrawFunc
 	keyDownFunc KeyboardEventFunc
 	keyUpFunc   KeyboardEventFunc
+}
+
+func init() {
+	fmt.Println("init")
+	err := sdl.Init(sdl.INIT_EVERYTHING)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // NewScreen returns a newly initialisd screen in Windowed mode
@@ -121,7 +131,6 @@ func (s *Screen) Run() {
 		if s.close {
 			return
 		}
-		s.keyb.Refresh()
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch e := event.(type) {
@@ -137,11 +146,11 @@ func (s *Screen) Run() {
 		}
 
 		s.rend.Clear()
-		s.updateFunc(sdl.GetTicks(), s.counter.LastFrameElapsed)
+		s.updateFunc(sdl.GetTicks(), s.counter.FrameElapsed)
 		s.drawFunc()
 		s.rend.Present()
-
-		sdl.Delay(1)
+		s.keyb.Refresh()
+		// sdl.Delay(2)
 		s.counter.FrameEnd()
 	}
 }
@@ -164,9 +173,10 @@ func (s *Screen) despatchKeyboardEvent(e *sdl.KeyboardEvent) {
 }
 
 // Default stub functions to reduce number of nil tests
-func updateStub(ticks uint32, elapsed float32) {}
-func drawStub()                                {}
-func keyEventStub(e *sdl.KeyboardEvent)        {}
+func updateStub(ticks uint32, elapsed float32) { sdl.Delay(5) }
+func drawStub()                                { sdl.Delay(5) }
+
+func keyEventStub(e *sdl.KeyboardEvent) {}
 
 // ClearUpdateFunc clears the function that will be called during the update phase
 func (s *Screen) ClearUpdateFunc() {

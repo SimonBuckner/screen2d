@@ -23,5 +23,10 @@ func (a *SpriteMap) AddSprite(key SpriteMapKey, sprite *Sprite) {
 
 // GetSprite gets the Sprite at the SpriteMap position specified by the SpriteMapKey
 func (a *SpriteMap) GetSprite(key SpriteMapKey) *Sprite {
-	return a.sprites[key]
+	// TODO Clean up FMT
+	// st := time.Now
+	s := a.sprites[key]
+	// rt := time.Since(st)
+	// fmt.Printf("RT %v\n", rt)
+	return s
 }
