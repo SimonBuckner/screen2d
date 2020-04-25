@@ -89,6 +89,20 @@ func RGBAPixels2Texture(rend *sdl.Renderer, rgbaData []int, w, h int32) (*sdl.Te
 	return tex, texErr
 }
 
+// RGBAPixels2Mask takes an array of RGBA pixel data and returns a collision mask
+func RGBAPixels2Mask(rgbaData []int, w, h int32) ([]bool, error) {
+	if int32(len(rgbaData)) != w*h {
+		return nil, fmt.Errorf("bitmap does not have the correct number of pixels for surface (%d: %d*%d", len(rgbaData), w, h)
+	}
+
+	mask := make([]bool, w*h)
+
+	for i := 0; i < len(rgbaData); i++ {
+		mask[i] = !(rgbaData[i] == 0x00000000)
+	}
+	return mask, nil
+}
+
 // Surface2Texture takes a Surface returnes a Texxture
 func Surface2Texture(rend *sdl.Renderer, surf *sdl.Surface) (*sdl.Texture, error) {
 	return rend.CreateTextureFromSurface(surf)
@@ -98,13 +112,13 @@ func Surface2Texture(rend *sdl.Renderer, surf *sdl.Surface) (*sdl.Texture, error
 type Box struct {
 	X1, Y1 int32
 	X2, Y2 int32
+	W, H   int32
 }
 
 // Hitter represents an item that can be checked to see if it has hit another item
 type Hitter interface {
 	GetBox() Box
-	// GetPitch() int32
-	// GetPixels() []byte
+	GetMask() []bool
 }
 
 // CheckBoxHit checks if any part of the two EntitState boxes overlap
@@ -126,44 +140,30 @@ func CheckBoxHit(entity1, entity2 Hitter) bool {
 	return true
 }
 
-// // CheckPixelHit checks if any pixels in the two EntityStates overlap
-// func CheckPixelHit(entity1, entity2 Hitter, miss *sdl.Color) bool {
+// CheckPixelHit checks if any pixels in the two EntityStates overlap
+func CheckPixelHit(entity1, entity2 Hitter) bool {
+	b1 := entity1.GetBox()
+	m1 := entity1.GetMask()
 
-// 	b1 := entity1.GetBox()
-// 	p1 := entity1.GetPitch()
+	b2 := entity2.GetBox()
+	m2 := entity2.GetMask()
 
-// 	pixels1 := entity1.GetPixels()
-
-// 	b2 := entity2.GetBox()
-// 	p2 := entity1.GetPitch()
-// 	pixels2 := entity2.GetPixels()
-
-// 	i := int32(0)
-// 	for i < int32(len(pixels1)) {
-// 		px := b1.X1 + (i % p1)
-// 		py := b1.Y1 + (i / p1)
-// 		if px >= b2.X1 && px < b2.X2 && py >= b2.Y1 && py < b2.Y2 {
-// 			x := px - b2.X1
-// 			y := py - b2.Y1
-// 			i2 := (y * p2) + (x * 4)
-// 			if pixels1[i] != miss.R && pixels2[i2] != miss.R {
-// 				return true
-// 			}
-// 			i++
-// 			if pixels1[i] != miss.G && pixels2[i2] != miss.G {
-// 				return true
-// 			}
-// 			i++
-// 			if pixels1[i] != miss.B && pixels2[i2] != miss.B {
-// 				return true
-// 			}
-// 			i++
-// 			// No point checking alpha
-// 			i++
-// 		}
-// 	}
-// 	return false
-// }
+	i := int32(0)
+	for i < int32(len(m1)) {
+		px := b1.X1 + (i % b1.W)
+		py := b1.Y1 + (i / b1.W)
+		if px >= b2.X1 && px < b2.X2 && py >= b2.Y1 && py < b2.Y2 {
+			x := px - b2.X1
+			y := py - b2.Y1
+			i2 := (y * b2.W) + x
+			if m1[i] == true && m2[i2] == true {
+				return true
+			}
+		}
+		i++
+	}
+	return false
+}
 
 // Counter hold various runtie countners
 type Counter struct {

@@ -10,6 +10,7 @@ type Sprite struct {
 	rend        *sdl.Renderer
 	surf        *sdl.Surface
 	tex         *sdl.Texture
+	mask        []bool
 }
 
 // NewSprite returns a new Sprite
@@ -42,6 +43,13 @@ func (s *Sprite) LoadRGBAPixels(pixels []int, pitch int32) error {
 			return err
 		}
 		s.tex = tex
+	}
+	{
+		mask, err := RGBAPixels2Mask(pixels, s.w, s.h)
+		if err != nil {
+			return err
+		}
+		s.mask = mask
 	}
 	return nil
 }

@@ -41,7 +41,17 @@ func (e *Entity) GetBox() Box {
 		Y1: int32(e.Y),
 		X2: int32(e.X) + e.Sprite.w,
 		Y2: int32(e.Y) + e.Sprite.h,
+		W:  e.Sprite.w,
+		H:  e.Sprite.h,
 	}
+}
+
+// GetMask returns the collision mask for the underlying sprite
+func (e *Entity) GetMask() []bool {
+	if e.Sprite != nil {
+		return e.Sprite.mask
+	}
+	return nil
 }
 
 // SetPos sets the position of the Entity

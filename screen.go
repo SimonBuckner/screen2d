@@ -47,7 +47,7 @@ func init() {
 }
 
 // NewScreen returns a newly initialisd screen in Windowed mode
-func NewScreen(width, height int, title string) (*Screen, error) {
+func NewScreen(width, height int, title string, hints ...ScreenHint) (*Screen, error) {
 	s := &Screen{
 		width:       int32(width),
 		height:      int32(height),
@@ -61,7 +61,9 @@ func NewScreen(width, height int, title string) (*Screen, error) {
 		keyUpFunc:   keyEventStub,
 	}
 
-	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "0")
+	for _, hint := range hints {
+		hint(s)
+	}
 
 	{
 		wind, err := sdl.CreateWindow(title, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, s.width, s.height, sdl.WINDOW_SHOWN)
@@ -106,6 +108,7 @@ func (s *Screen) Rend() *sdl.Renderer {
 // SetUpdateFunc sets the function that will be called during the update phase
 func (s *Screen) SetUpdateFunc(f UpdateFunc) {
 	s.updateFunc = f
+	s.counter.Start()
 }
 
 // SetDrawFunc sets the function that will be called during the draw phase
@@ -150,7 +153,6 @@ func (s *Screen) Run() {
 		s.drawFunc()
 		s.rend.Present()
 		s.keyb.Refresh()
-		// sdl.Delay(2)
 		s.counter.FrameEnd()
 	}
 }
@@ -173,10 +175,9 @@ func (s *Screen) despatchKeyboardEvent(e *sdl.KeyboardEvent) {
 }
 
 // Default stub functions to reduce number of nil tests
-func updateStub(ticks uint32, elapsed float32) { sdl.Delay(5) }
-func drawStub()                                { sdl.Delay(5) }
-
-func keyEventStub(e *sdl.KeyboardEvent) {}
+func drawStub()                                {}
+func updateStub(ticks uint32, elapsed float32) {}
+func keyEventStub(e *sdl.KeyboardEvent)        {}
 
 // ClearUpdateFunc clears the function that will be called during the update phase
 func (s *Screen) ClearUpdateFunc() {
@@ -209,4 +210,44 @@ func (s *Screen) ClearFuncs() {
 // GetKBState allows access to the current state of the keyboard
 func (s *Screen) GetKBState() *KBState {
 	return s.keyb
+}
+
+// Screen Configuration
+
+// ScreenHint represtents configuration options when creating a new screen
+type ScreenHint func(*Screen)
+
+// SetVSync enables or disables virtical sync
+func SetVSync(enabled bool) func(*Screen) {
+	return func(s *Screen) {
+		if enabled {
+			sdl.SetHint(sdl.HINT_RENDER_VSYNC, "1")
+		}
+	}
+}
+
+// ScreenScalingQuality represent the scaling method
+type ScreenScalingQuality int
+
+const (
+	// ScreenScalingNearestPixel - nearest pixel sampling
+	ScreenScalingNearestPixel ScreenScalingQuality = iota
+	// ScreenScalingLinear - linear filtering (supported by OpenGL and Direct3D)
+	ScreenScalingLinear
+	// ScreenScalingAnistropic - anisotropic filtering (supported by Direct3D)
+	ScreenScalingAnistropic
+)
+
+// SetScalingQuality sets the scaling quality of the screen
+func SetScalingQuality(quality ScreenScalingQuality) func(*Screen) {
+	return func(s *Screen) {
+		switch quality {
+		case ScreenScalingLinear:
+			sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "1")
+		case ScreenScalingAnistropic:
+			sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "2")
+		default:
+			sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "0")
+		}
+	}
 }
