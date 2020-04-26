@@ -6,7 +6,7 @@ type Entity struct {
 	X, Y, Z          float32
 	Scale            float32
 	Sprite           *Sprite
-	calcScreenXYFunc CalcScreenXYFunc
+	CalcScreenXYFunc CalcScreenXYFunc
 	Visible          bool
 }
 
@@ -29,7 +29,7 @@ func NewEntityWithTransform() *Entity {
 		Y:                0,
 		Z:                0,
 		Scale:            1.0,
-		calcScreenXYFunc: calcScreenXY,
+		CalcScreenXYFunc: calcScreenXY,
 	}
 	return e
 }
@@ -71,16 +71,16 @@ func (e *Entity) Draw() {
 	if e.Sprite == nil || e.Visible == false {
 		return
 	}
-	x, y := e.calcScreenXYFunc(e.X, e.Y, e.Scale)
+	x, y := e.CalcScreenXYFunc(e.X, e.Y, e.Scale)
 	e.Sprite.DrawAt(x, y, e.Scale)
 }
 
 // SetCalcScreenXYFunc overrides the default virutal game to screen coord calculation
 func (e *Entity) SetCalcScreenXYFunc(f CalcScreenXYFunc) {
-	e.calcScreenXYFunc = f
+	e.CalcScreenXYFunc = f
 }
 
 // ClearCalcScreenXYFunc restores the default virutal game to screen coord calculation
 func (e *Entity) ClearCalcScreenXYFunc() {
-	e.calcScreenXYFunc = calcScreenXY
+	e.CalcScreenXYFunc = calcScreenXY
 }

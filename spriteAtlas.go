@@ -1,6 +1,8 @@
 package screen2d
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 // SpriteAtlas comprises multiple images tiled into a larger image. These images can be retrieved via their coordinates
 type SpriteAtlas struct {
@@ -24,12 +26,12 @@ func NewSpriteAtlas(rend *sdl.Renderer) *SpriteAtlas {
 }
 
 // LoadRGBAPixels loads the Sprite using an array of 32-bit pixels containing RGBA values
-func (sa *SpriteAtlas) LoadRGBAPixels(pixels []int, pitch, tileWidth, tileHeight int32) error {
-	w := pitch * tileWidth
+func (sa *SpriteAtlas) LoadRGBAPixels(pixels []int, pixelsPitch, tilePitch, tileHeight int32) error {
+	w := pixelsPitch
 	h := int32(len(pixels)) / w
-	sa.tileWidth = tileWidth * 4
+	sa.tileWidth = tilePitch
 	sa.tileHeight = tileHeight
-	sa.pitch = pitch * 4
+	sa.pitch = pixelsPitch * 4
 
 	{
 		surf, err := RGBAPixels2Surface(pixels, w, h)
@@ -66,5 +68,6 @@ func (sa *SpriteAtlas) DrawTileAt(tileX, tileY, screenX, screenY int32, scale fl
 		W: int32(float32(sa.tileWidth) * scale),
 		H: int32(float32(sa.tileHeight) * scale),
 	}
+
 	sa.rend.Copy(sa.tex, srcRect, dstRect)
 }
