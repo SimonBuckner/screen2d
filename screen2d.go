@@ -199,11 +199,3 @@ func (c *Counter) FrameEnd() {
 		c.fpsFrames = 0
 	}
 }
-
-// CalcScreenXYFunc allows for custom conversion of virtaul Game X/Y coords to Screen coords
-type CalcScreenXYFunc func(x, y, scale float32) (tX, tY int32)
-
-// calcScreenXY is the default conversion used for virtual Game to Screen X/Y coords
-func calcScreenXY(x, y, scale float32) (tX, tY int32) {
-	return int32(x * scale), int32(y * scale)
-}

@@ -27,10 +27,10 @@ func main() {
 	g := &game{
 		screen: s,
 		atlas:  screen2d.NewSpriteMap(),
-		e1:     screen2d.NewEntity(),
-		e2:     screen2d.NewEntity(),
-		e3:     screen2d.NewEntity(),
-		e4:     screen2d.NewEntity(),
+		// e1:     screen2d.NewEntity(),
+		// e2:     screen2d.NewEntity(),
+		// e3:     screen2d.NewEntity(),
+		// e4:     screen2d.NewEntity(),
 	}
 
 	s1 := screen2d.NewSprite(s.Rend())

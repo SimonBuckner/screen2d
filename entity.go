@@ -3,35 +3,12 @@ package screen2d
 // Entity is a item that can be displayed on the screen and tested for collision
 type Entity struct {
 	// Virtaul game position
-	X, Y, Z          float32
-	Scale            float32
-	Sprite           *Sprite
-	CalcScreenXYFunc CalcScreenXYFunc
-	Visible          bool
-}
-
-// NewEntity returns a new Entity
-func NewEntity() *Entity {
-	e := &Entity{
-		X:       0,
-		Y:       0,
-		Z:       0,
-		Scale:   1.0,
-		Visible: true,
-	}
-	return e
-}
-
-// NewEntityWithTransform returns a new Entity
-func NewEntityWithTransform() *Entity {
-	e := &Entity{
-		X:                0,
-		Y:                0,
-		Z:                0,
-		Scale:            1.0,
-		CalcScreenXYFunc: calcScreenXY,
-	}
-	return e
+	X, Y, Z float32
+	Scale   float32
+	Sprite  *Sprite
+	// ProjectXYFunc ProjectXYFunc
+	Visible       bool
+	projectXYFunc ProjectXYFunc
 }
 
 // GetBox returns the Emntity Box
@@ -71,16 +48,16 @@ func (e *Entity) Draw() {
 	if e.Sprite == nil || e.Visible == false {
 		return
 	}
-	x, y := e.CalcScreenXYFunc(e.X, e.Y, e.Scale)
+	x, y := e.projectXYFunc(e.X, e.Y, e.Scale)
 	e.Sprite.DrawAt(x, y, e.Scale)
 }
 
-// SetCalcScreenXYFunc overrides the default virutal game to screen coord calculation
-func (e *Entity) SetCalcScreenXYFunc(f CalcScreenXYFunc) {
-	e.CalcScreenXYFunc = f
+// SetProjectXYFunc overrides the default virutal game to screen coord calculation
+func (e *Entity) SetProjectXYFunc(f ProjectXYFunc) {
+	e.projectXYFunc = f
 }
 
-// ClearCalcScreenXYFunc restores the default virutal game to screen coord calculation
-func (e *Entity) ClearCalcScreenXYFunc() {
-	e.CalcScreenXYFunc = calcScreenXY
+// ClearProjectXYFunc restores the default virutal game to screen coord calculation
+func (e *Entity) ClearProjectXYFunc() {
+	e.projectXYFunc = defaultProjectXY
 }

@@ -13,27 +13,29 @@ const (
 // EntityStrip is a strip of items that can be displayed on the screen and tested for collision
 type EntityStrip struct {
 	// Virtaul game position
-	X, Y, Z          float32
-	Scale            float32
-	Sprites          []*Sprite
-	size             int
-	direction        StripDirection
-	calcScreenXYFunc CalcScreenXYFunc
+	X, Y, Z   float32
+	Scale     float32
+	Sprites   []*Sprite
+	size      int
+	direction StripDirection
+	// ProjectXYFunc ProjectXYFunc
+	projectXYFunc ProjectXYFunc
 }
 
 // NewEntityStrip returns a new EntityStrip
-func NewEntityStrip(size int, direction StripDirection) *EntityStrip {
-	e := &EntityStrip{
-		X:         0,
-		Y:         0,
-		Z:         0,
-		Scale:     1.0,
-		size:      size,
-		direction: direction,
-		Sprites:   make([]*Sprite, size),
-	}
-	return e
-}
+// func NewEntityStrip(size int, direction StripDirection) *EntityStrip {
+// 	e := &EntityStrip{
+// 		X:                0,
+// 		Y:                0,
+// 		Z:                0,
+// 		Scale:            1.0,
+// 		size:             size,
+// 		direction:        direction,
+// 		Sprites:          make([]*Sprite, size),
+// 		ProjectXYFunc: scaleScreenXY,
+// 	}
+// 	return e
+// }
 
 // GetBox returns the Entity Box
 func (e *EntityStrip) GetBox() Box {
@@ -65,7 +67,7 @@ func (e *EntityStrip) Draw() {
 		return
 	}
 
-	x, y := e.calcScreenXYFunc(e.X, e.Y, e.Scale)
+	x, y := e.projectXYFunc(e.X, e.Y, e.Scale)
 	for _, s := range e.Sprites {
 		if s != nil {
 			s.DrawAt(x, y, e.Scale)
@@ -74,12 +76,12 @@ func (e *EntityStrip) Draw() {
 	}
 }
 
-// SetCalcScreenXYFunc overrides the default virutal game to screen coord calculation
-func (e *EntityStrip) SetCalcScreenXYFunc(f CalcScreenXYFunc) {
-	e.calcScreenXYFunc = f
+// SetProjectXYFunc overrides the default virutal game to screen coord calculation
+func (e *EntityStrip) SetProjectXYFunc(f ProjectXYFunc) {
+	e.projectXYFunc = f
 }
 
-// ClearCalcScreenXYFunc restores the default virutal game to screen coord calculation
-func (e *EntityStrip) ClearCalcScreenXYFunc() {
-	e.calcScreenXYFunc = calcScreenXY
+// ClearProjectXYFunc restores the default virutal game to screen coord calculation
+func (e *EntityStrip) ClearProjectXYFunc() {
+	e.projectXYFunc = defaultProjectXY
 }
