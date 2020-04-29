@@ -13,7 +13,10 @@ type Entity struct {
 
 // GetBox returns the Emntity Box
 func (e *Entity) GetBox() Box {
-	return Box{
+	if e.Sprite == nil {
+		return Box{}
+	}
+	b := Box{
 		X1: int32(e.X),
 		Y1: int32(e.Y),
 		X2: int32(e.X) + e.Sprite.w,
@@ -21,6 +24,8 @@ func (e *Entity) GetBox() Box {
 		W:  e.Sprite.w,
 		H:  e.Sprite.h,
 	}
+
+	return b
 }
 
 // GetMask returns the collision mask for the underlying sprite

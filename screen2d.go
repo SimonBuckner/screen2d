@@ -140,6 +140,33 @@ func CheckBoxHit(entity1, entity2 Hitter) bool {
 	return true
 }
 
+// CheckBoxHitDebug checks if any part of the two EntitState boxes overlap
+func CheckBoxHitDebug(entity1, entity2 Hitter) bool {
+
+	// fmt.Printf("R1: ")
+	r1 := entity1.GetBox()
+	// fmt.Println(r1)
+
+	// fmt.Printf("R2: ")
+	r2 := entity2.GetBox()
+	// fmt.Println(r2)
+
+	fmt.Printf("L/R Check - ")
+	// Too far left or right
+	if r1.X1 > r2.X2 || r1.X2 < r2.X2 {
+		fmt.Printf("Miss\n")
+		return false
+	}
+	fmt.Printf(" Done / H/L Check -- ")
+	// Top high or low
+	if r1.Y1 > r2.Y2 || r1.Y2 < r2.Y1 {
+		fmt.Printf("Miss\n")
+		return false
+	}
+	fmt.Printf("Hit\n")
+	return true
+}
+
 // CheckPixelHit checks if any pixels in the two EntityStates overlap
 func CheckPixelHit(entity1, entity2 Hitter) bool {
 	b1 := entity1.GetBox()
