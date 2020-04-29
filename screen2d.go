@@ -128,7 +128,7 @@ func CheckBoxHit(entity1, entity2 Hitter) bool {
 	r2 := entity2.GetBox()
 
 	// Too far left or right
-	if r1.X1 > r2.X2 || r1.X2 < r2.X2 {
+	if r1.X1 > r2.X2 || r1.X2 < r2.X1 {
 		return false
 	}
 
@@ -143,21 +143,19 @@ func CheckBoxHit(entity1, entity2 Hitter) bool {
 // CheckBoxHitDebug checks if any part of the two EntitState boxes overlap
 func CheckBoxHitDebug(entity1, entity2 Hitter) bool {
 
-	// fmt.Printf("R1: ")
 	r1 := entity1.GetBox()
-	// fmt.Println(r1)
+	fmt.Printf("R1 - X1: %d   Y1: %d   X2: %d   Y2: %d\n", r1.X1, r1.Y1, r1.X2, r1.Y2)
 
-	// fmt.Printf("R2: ")
 	r2 := entity2.GetBox()
-	// fmt.Println(r2)
+	fmt.Printf("R2 - X1: %d   Y1: %d   X2: %d   Y2: %d\n", r2.X1, r2.Y1, r2.X2, r2.Y2)
 
 	fmt.Printf("L/R Check - ")
 	// Too far left or right
-	if r1.X1 > r2.X2 || r1.X2 < r2.X2 {
+	if r1.X1 > r2.X2 || r1.X2 < r2.X1 {
 		fmt.Printf("Miss\n")
 		return false
 	}
-	fmt.Printf(" Done / H/L Check -- ")
+	fmt.Printf(" On Target / H/L Check -- ")
 	// Top high or low
 	if r1.Y1 > r2.Y2 || r1.Y2 < r2.Y1 {
 		fmt.Printf("Miss\n")

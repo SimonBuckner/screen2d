@@ -1,7 +1,5 @@
 package screen2d
 
-import "fmt"
-
 // TextEntity is a item that can be displayed on the screen and tested for collision
 type TextEntity struct {
 	// Virtaul game position
@@ -33,7 +31,6 @@ func (e *TextEntity) LoadAtlas(atlas *SpriteAtlas, keys map[rune]int32, fontWidt
 // Draw is the default draw method
 func (e *TextEntity) Draw() {
 	if e.atlas == nil || e.Visible == false {
-		fmt.Println("TextEntity - Empty atlas")
 		return
 	}
 
