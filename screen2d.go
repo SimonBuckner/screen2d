@@ -3,6 +3,7 @@ package screen2d
 import (
 	"fmt"
 	"time"
+	"unsafe"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -29,15 +30,15 @@ func HexColorToRGBA(color int) *Color {
 
 // new1PTexture returns a new texture comprising a single pixel
 func new1PTexture(rend *sdl.Renderer, r, g, b, a uint8) *sdl.Texture {
-	tex, _ := rend.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_STATIC, 1, 1)
-	tex.SetBlendMode(sdl.BLENDMODE_ADD)
+	tex, _ := rend.CreateTexture(uint32(sdl.PIXELFORMAT_RGBA8888), int(sdl.TEXTUREACCESS_STATIC), 1, 1)
+	tex.SetBlendMode(sdl.BlendMode(sdl.BLENDMODE_ADD))
 	pixels := make([]byte, 4)
 	pixels[0] = r
 	pixels[1] = g
 	pixels[2] = b
 	pixels[3] = a
 
-	tex.Update(nil, pixels, 4)
+	tex.Update(nil, unsafe.Pointer(&pixels), 4)
 	return tex
 }
 
@@ -47,7 +48,7 @@ func RGBAPixels2Surface(rgbaData []int, w, h int32) (*sdl.Surface, error) {
 		return nil, fmt.Errorf("bitmap does not have the correct number of pixels for surface (%d: %d*%d", len(rgbaData), w, h)
 	}
 
-	surf, err := sdl.CreateRGBSurfaceWithFormat(0, w, h, 32, sdl.PIXELFORMAT_RGBA8888)
+	surf, err := sdl.CreateRGBSurfaceWithFormat(0, w, h, 32, uint32(sdl.PIXELFORMAT_RGBA8888))
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +71,7 @@ func RGBAPixels2Texture(rend *sdl.Renderer, rgbaData []int, w, h int32) (*sdl.Te
 		return nil, fmt.Errorf("bitmap does not have the correct number of pixels for surface (%d: %d*%d", len(rgbaData), w, h)
 	}
 
-	surf, err := sdl.CreateRGBSurfaceWithFormat(0, w, h, 32, sdl.PIXELFORMAT_RGBA8888)
+	surf, err := sdl.CreateRGBSurfaceWithFormat(0, w, h, 32, uint32(sdl.PIXELFORMAT_RGBA8888))
 	if err != nil {
 		return nil, err
 	}

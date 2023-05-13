@@ -40,7 +40,7 @@ type Screen struct {
 
 func init() {
 	fmt.Println("init")
-	err := sdl.Init(sdl.INIT_EVERYTHING)
+	err := sdl.Init(uint32(sdl.INIT_EVERYTHING))
 	if err != nil {
 		panic(err)
 	}
@@ -66,7 +66,7 @@ func NewScreen(width, height int, title string, hints ...ScreenHint) (*Screen, e
 	}
 
 	{
-		wind, err := sdl.CreateWindow(title, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, s.width, s.height, sdl.WINDOW_SHOWN)
+		wind, err := sdl.CreateWindow(title, int32(sdl.WINDOWPOS_CENTERED), int32(sdl.WINDOWPOS_CENTERED), s.width, s.height, uint32(sdl.WINDOW_SHOWN))
 		if err != nil {
 			return nil, err
 		}
@@ -74,7 +74,7 @@ func NewScreen(width, height int, title string, hints ...ScreenHint) (*Screen, e
 	}
 
 	{
-		rend, err := sdl.CreateRenderer(s.wind, -1, sdl.RENDERER_ACCELERATED)
+		rend, err := sdl.CreateRenderer(s.wind, -1, uint32(sdl.RENDERER_ACCELERATED))
 		if err != nil {
 			return nil, err
 		}
@@ -221,7 +221,7 @@ type ScreenHint func(*Screen)
 func SetVSync(enabled bool) func(*Screen) {
 	return func(s *Screen) {
 		if enabled {
-			sdl.SetHint(sdl.HINT_RENDER_VSYNC, "1")
+			sdl.SetHint(string(sdl.HINT_RENDER_VSYNC), "1")
 		}
 	}
 }
@@ -243,11 +243,11 @@ func SetScalingQuality(quality ScreenScalingQuality) func(*Screen) {
 	return func(s *Screen) {
 		switch quality {
 		case ScreenScalingLinear:
-			sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "1")
+			sdl.SetHint(string(sdl.HINT_RENDER_SCALE_QUALITY), "1")
 		case ScreenScalingAnistropic:
-			sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "2")
+			sdl.SetHint(string(sdl.HINT_RENDER_SCALE_QUALITY), "2")
 		default:
-			sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "0")
+			sdl.SetHint(string(sdl.HINT_RENDER_SCALE_QUALITY), "0")
 		}
 	}
 }
